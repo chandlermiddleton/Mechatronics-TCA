@@ -1,0 +1,67 @@
+#include <Adafruit_LiquidCrystal.h>
+
+Adafruit_LiquidCrystal lcd(0);
+
+const int currentPin = A0;     // top of 10 ohm shunt
+const int ledTopPin = A1;      // top/anode side of LED
+
+const float shuntResistance = 10.0;
+
+int currentSensorValue = 0;
+int ledTopSensorValue = 0;
+
+float shuntVoltage = 0.0;
+float ledTopVoltage = 0.0;
+float ledVoltage = 0.0;
+
+float currentAmps = 0.0;
+float currentMilliAmps = 0.0;
+
+void setup() {
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+
+  lcd.setCursor(0, 0);
+  lcd.print("V + I Meter");
+  delay(1000);
+  lcd.clear();
+}
+
+void loop() {
+  // A0 reads voltage across the 10 ohm shunt
+  currentSensorValue = analogRead(currentPin);
+  shuntVoltage = currentSensorValue * (5.0 / 1023.0);
+
+  // Current = shunt voltage / shunt resistance
+  currentAmps = shuntVoltage / shuntResistance;
+  currentMilliAmps = currentAmps * 1000.0;
+
+  // A1 reads top side of LED compared to ground
+  ledTopSensorValue = analogRead(ledTopPin);
+  ledTopVoltage = ledTopSensorValue * (5.0 / 1023.0);
+
+  // LED voltage = top of LED - bottom of LED
+  ledVoltage = ledTopVoltage - shuntVoltage;
+
+  lcd.setCursor(0, 0);
+  lcd.print("LED V:");
+  lcd.print(ledVoltage, 2);
+  lcd.print(" V    ");
+
+  lcd.setCursor(0, 1);
+  lcd.print("I:");
+  lcd.print(currentMilliAmps, 2);
+  lcd.print(" mA     ");
+
+  Serial.print("Shunt V: ");
+  Serial.print(shuntVoltage, 3);
+  Serial.print(" V  LED top: ");
+  Serial.print(ledTopVoltage, 3);
+  Serial.print(" V  LED V: ");
+  Serial.print(ledVoltage, 3);
+  Serial.print(" V  Current: ");
+  Serial.print(currentMilliAmps, 2);
+  Serial.println(" mA");
+
+  delay(300);
+}
