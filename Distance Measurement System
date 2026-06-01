@@ -1,0 +1,47 @@
+#include <Adafruit_LiquidCrystal.h>
+
+Adafruit_LiquidCrystal lcd(0);
+
+const int sensorPin = 9;
+
+long duration;
+float distanceCm;
+
+void setup() {
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Distance:");
+}
+
+void loop() {
+  // Send pulse using the signal pin
+  pinMode(sensorPin, OUTPUT);
+  digitalWrite(sensorPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(sensorPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(sensorPin, LOW);
+
+  // Read pulse back on same signal pin
+  pinMode(sensorPin, INPUT);
+  duration = pulseIn(sensorPin, HIGH);
+
+  // Convert time to distance
+  distanceCm = duration * 0.0343 / 2;
+
+  Serial.print("Distance: ");
+  Serial.print(distanceCm);
+  Serial.println(" cm");
+
+  lcd.setCursor(0, 0);
+  lcd.print("Distance:       ");
+
+  lcd.setCursor(0, 1);
+  lcd.print(distanceCm);
+  lcd.print(" cm      ");
+
+  delay(500);
+}
